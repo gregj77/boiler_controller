@@ -13,13 +13,13 @@ class TemperatureSensor final {
                 bool _isInitialized;
 
             public:
-                explicit Sensors() noexcept {};
-                Sensors(TemperatureSensor&& other) noexcept;
+                explicit Sensors(std::initializer_list<TemperatureSensor> sensors) noexcept;
+                Sensors(TemperatureSensor&& other) = delete;
                 Sensors(const Sensors&) = delete;
                 Sensors& operator=(Sensors&&) = delete;
                 Sensors& operator=(const Sensors&) = delete;
 
-                void initializeTaskLoop(std::initializer_list<TemperatureSensor> sensors);
+                void setup();
 
             private:
                 void onTaskLoopStarted();
@@ -37,15 +37,20 @@ class TemperatureSensor final {
         static constexpr float CHANGE_DELTA = 0.5f;
 
         const uint8_t _srcPin;
+        String _name;
         float _currentTemperature = 0;
         float _lastReportedTemperature = 0;
         float _resistance = 0;
         bool _firstReading = true;
         TemperatureReadingCallback _onTempChanged;
 
+        explicit TemperatureSensor(uint8_t srcPin, const String& name = "", TemperatureReadingCallback cb = nullptr) noexcept;
+
     public:
 
-        explicit TemperatureSensor(uint8_t srcPin, TemperatureReadingCallback cb = nullptr) noexcept;
+        static TemperatureSensor createTopTankSensor(TemperatureReadingCallback sensorCallback) noexcept;
+        static TemperatureSensor createBottomTankSensor(TemperatureReadingCallback sensorCallback) noexcept;
+
         TemperatureSensor(TemperatureSensor&& other) noexcept;
         TemperatureSensor() = delete;
         TemperatureSensor(const TemperatureSensor&) = delete;
@@ -54,7 +59,8 @@ class TemperatureSensor final {
 
         inline float getTemp() const { return _currentTemperature; }
         inline float getResistance() const { return _resistance; }
+        inline const String& getName() const { return _name; }
 
     private:
-        void checkReading();
+        void checkReading(bool notifyOutput);
 };

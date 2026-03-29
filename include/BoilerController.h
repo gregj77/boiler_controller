@@ -1,7 +1,10 @@
 #pragma once
 #include <Arduino.h>
+#include <functional>
 
 class BoilerController final {
+    public:
+        using BoilerStatusCallback = std::function<void(float outputTemp, bool relayOn)>;
     private:
         static constexpr uint8_t MOSI_PIN = 40;
         static constexpr uint8_t SCK_PIN = 41;
@@ -16,13 +19,18 @@ class BoilerController final {
 
         float _currentTemp;
         float _outputTemp;        
-    public:
+        bool _relayEnabled = false; 
+        BoilerStatusCallback _onStatusChanged;
 
-        explicit BoilerController() noexcept;
+    public:
+        explicit BoilerController(BoilerStatusCallback callback = nullptr) noexcept;
 
         void setOutputTemperature(float temperature);
 
         void toggleHeatPump(bool enable);
+
+        float getOutputTemperature() const { return _outputTemp; }
+        bool isHeatPumpEnabled() const { return _relayEnabled; }
 
         BoilerController(const BoilerController&) = delete;
         BoilerController(BoilerController&&) = delete;
@@ -31,5 +39,4 @@ class BoilerController final {
 
     private:
         float mapTemperature(float temperature) const;
-
 };
