@@ -5,6 +5,7 @@
 #define TOP_TANK_TEMP_REGISTER 0
 #define BOTTOM_TANK_TEMP_REGISTER 1
 #define BOILER_CONTROL_REGISTER 2 
+#define ACTIVE_RULES_MASK_REGISTER 3
 
 #define CMD_TYPE_REG 1000
 #define CMD_HIGH_REG 1001
@@ -41,6 +42,7 @@ void ModbusDriver::initializeTaskLoop() {
     _serialPort.addIreg(TOP_TANK_TEMP_REGISTER); 
     _serialPort.addIreg(BOTTOM_TANK_TEMP_REGISTER);
     _serialPort.addIreg(BOILER_CONTROL_REGISTER); 
+    _serialPort.addIreg(ACTIVE_RULES_MASK_REGISTER); 
 
     _serialPort.addHreg(CMD_TYPE_REG);
     _serialPort.addHreg(CMD_LOW_REG);
@@ -86,6 +88,7 @@ void ModbusDriver::onSerialDataReceived() {
                 xQueueReset(_serialQueue);
             }
         }
+        _serialPort.Ireg(ACTIVE_RULES_MASK_REGISTER, _ruleEngine.getActiveRulesMask());
     }
 }
 

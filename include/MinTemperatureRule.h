@@ -2,18 +2,18 @@
 
 #include <IRule.h>
 
-class BoilerController;
 
 class MinTemperatureRule final : public IRule {
     private:
-        BoilerController& _boilerController;
-        float _threshold;
-        bool _isTopTank;
+        constexpr static float MIN_TEMP_THRESHOLD = 35.0f;
+        constexpr static float EXPECTED_TEMP = 45.0f;
+
+        bool _isActive;
+        float _currentTemperature;
 
     public:
-        explicit MinTemperatureRule(BoilerController& boilerController) noexcept;
+        explicit MinTemperatureRule() noexcept;
 
-        MinTemperatureRule() = delete;
         MinTemperatureRule(const MinTemperatureRule&) = delete;
         MinTemperatureRule(MinTemperatureRule&&) = delete;
         MinTemperatureRule& operator=(const MinTemperatureRule&) = delete;
@@ -23,4 +23,5 @@ class MinTemperatureRule final : public IRule {
         uint16_t getId() const override { return 1; }
 
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;
+        void stop(ICommandDispatcher& dispatcher) override;
 };

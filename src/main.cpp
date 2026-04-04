@@ -11,6 +11,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, LOW);
   Serial.begin(115200);
   Log.begin(LOG_LEVEL_VERBOSE, &Serial);
+  //Log.begin(LOG_LEVEL_TRACE, &Serial);
 
   app.setup();
   Log.info("Setup complete!");

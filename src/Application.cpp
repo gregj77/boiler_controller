@@ -1,5 +1,7 @@
 #include "Application.h"
 #include "MinTemperatureRule.h"
+#include "BoilerControlRule.h"
+#include "HighProductionYieldRule.h"
 
 #include <Arduino.h>
 #include <ArduinoLog.h>
@@ -23,7 +25,11 @@ Application::Application() noexcept:
             })
         }) {
 
-    _ruleEngine.registerRule(std::unique_ptr<MinTemperatureRule>(new MinTemperatureRule(_boilerController)), true);            
+    _ruleEngine.registerRule(std::unique_ptr<MinTemperatureRule>(new MinTemperatureRule()), false);            
+    _ruleEngine.registerRule(std::unique_ptr<HighProductionYieldRule>(new HighProductionYieldRule()), true);
+    _ruleEngine.registerRule(std::unique_ptr<BoilerControlRule>(new BoilerControlRule(_boilerController)), true);
+
+
     Log.noticeln("[APP] Application instance created");
 }
 
@@ -31,6 +37,7 @@ void Application::setup() {
         Log.noticeln("[APP] Starting sensor setup....");
         _commDriver.initializeTaskLoop();
         _sensors.setup();
+        _ruleEngine.init();
         Log.noticeln("[APP] Setup complete");
 }    
 

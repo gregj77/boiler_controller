@@ -7,28 +7,9 @@
 #include <vector>
 #include "IRule.h"
 #include "ICommandDispatcher.h"
+#include "RuleSetup.h"
 
-struct Command {
-    uint16_t id;
-    int32_t data;
-};
 
-namespace CommandRange {
-    const uint16_t CONTROL_START = 1;
-    const uint16_t NOTIFY_START  = 100;
-    const uint16_t CONFIG_START  = 200;
-    const uint16_t SYSTEM_START  = 250;
-}
-
-enum CommandID : uint16_t {
-    CMD_SET_RULES_MASK    = 1,
-    CMD_MANUAL_RELAY_CTRL = 3,
-
-    CMD_NOTIFY_TEMP_TOP    = 100,
-    CMD_NOTIFY_TEMP_BOTTOM = 101,
-
-    CMD_SYS_RESET          = 250,
-};
 
 
 class RuleEngine final : public ICommandDispatcher {
@@ -40,19 +21,42 @@ private:
         std::unique_ptr<IRule> rule; 
         bool isActive;
 
-        RuleSlot(std::unique_ptr<IRule> rule, bool active = true) : rule(std::move(rule)), isActive(active) {}
+        uint32_t intervalMillis;
+        uint32_t lastTick;
+        bool isRecurring;
+        bool isTimerActive;
+
+        RuleSlot(std::unique_ptr<IRule> rule, bool active = true) 
+            : rule(std::move(rule))
+            , isActive(active)
+            , intervalMillis(0)
+            , lastTick(0)
+            , isRecurring(false)
+            , isTimerActive(false) {                
+        }
     };
 
     std::vector<RuleSlot> _rules;
+    uint32_t _lastTick;
+    uint16_t _activeRulesMask;
+
+    void onCheckTimers();
+    void onProcessCommand();
 
 public:
     explicit RuleEngine() noexcept;
+
+    void init();
 
     void processCommands(); 
 
     void dispatchCommand(const Command& cmd) override;
 
+    void registerTimer(IRule& sender, uint32_t intervalMillis, bool recurring) override;
+
     void registerRule(std::unique_ptr<IRule> rule, bool active);
+
+    uint16_t getActiveRulesMask() const { return _activeRulesMask; };
 
     RuleEngine(const RuleEngine&) = delete;
     RuleEngine(RuleEngine&&) = delete;
