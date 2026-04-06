@@ -30,10 +30,10 @@ Application::Application() noexcept:
 
     _ruleEngine.registerRule(std::unique_ptr<MinTemperatureRule>(new MinTemperatureRule()), true);            
     _ruleEngine.registerRule(std::unique_ptr<HighProductionYieldRule>(new HighProductionYieldRule()), true);
-    _ruleEngine.registerRule(std::unique_ptr<LegionellaRule>(new LegionellaRule()), false);
     _ruleEngine.registerRule(std::unique_ptr<HotWaterBoostRule>(new HotWaterBoostRule()), false);
-    _ruleEngine.registerRule(std::unique_ptr<BoilerControlRule>(new BoilerControlRule(_boilerController)), true);
+    _ruleEngine.registerRule(std::unique_ptr<LegionellaRule>(new LegionellaRule()), false);
     _ruleEngine.registerRule(std::unique_ptr<HeatPumpControlRule>(new HeatPumpControlRule(_boilerController)), true);
+    _ruleEngine.registerRule(std::unique_ptr<BoilerControlRule>(new BoilerControlRule(_boilerController)), true);
 
 
     Log.noticeln("[APP] Application instance created");

@@ -11,7 +11,7 @@ class HotWaterBoostRule final : public IRule {
         HotWaterBoostRule& operator=(HotWaterBoostRule&&) = delete;
 
         const char* getName() const override { return "HotWaterBoost"; }
-        uint16_t getId() const override { return 16; }
+        uint16_t getId() const override { return 4; }
 
         void onInit (ICommandDispatcher& dispatcher) override;
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;

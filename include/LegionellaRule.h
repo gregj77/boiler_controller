@@ -21,7 +21,7 @@ class LegionellaRule final : public IRule {
         LegionellaRule& operator=(LegionellaRule&&) = delete;
 
         const char* getName() const override { return "Legionella"; }
-        uint16_t getId() const override { return 4; }
+        uint16_t getId() const override { return 8; }
 
         void onInit (ICommandDispatcher& dispatcher) override;
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;
