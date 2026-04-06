@@ -20,6 +20,7 @@ class TemperatureSensor final {
                 Sensors& operator=(const Sensors&) = delete;
 
                 void setup();
+                void requireSensorUpdate();
 
             private:
                 void onTaskLoopStarted();

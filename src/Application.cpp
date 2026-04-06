@@ -83,5 +83,13 @@ void Application::handleBottomTemp(float measuredTemperature) {
 }
 
 void Application::processLoop() {
+    
+    uint16_t currentMask = _ruleEngine.getActiveRulesMask();
     _ruleEngine.processCommands();
+    uint16_t updatedMask = _ruleEngine.getActiveRulesMask();
+
+    if (currentMask != updatedMask) {
+        Log.noticeln("[APP] Active rules mask changed");
+        _sensors.requireSensorUpdate();
+    }
 }

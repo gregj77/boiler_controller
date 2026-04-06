@@ -6,6 +6,7 @@
 #define BOTTOM_TANK_TEMP_REGISTER 1
 #define BOILER_CONTROL_REGISTER 2 
 #define ACTIVE_RULES_MASK_REGISTER 3
+#define DEVICE_ID_REGISTER 21
 
 #define CMD_TYPE_REG 1000
 #define CMD_HIGH_REG 1001
@@ -43,6 +44,9 @@ void ModbusDriver::initializeTaskLoop() {
     _serialPort.addIreg(BOTTOM_TANK_TEMP_REGISTER);
     _serialPort.addIreg(BOILER_CONTROL_REGISTER); 
     _serialPort.addIreg(ACTIVE_RULES_MASK_REGISTER); 
+    
+    _serialPort.addHreg(DEVICE_ID_REGISTER, 0);
+    _serialPort.addHreg(DEVICE_ID_REGISTER + 1, _serialPort.getSlaveId());
 
     _serialPort.addHreg(CMD_TYPE_REG);
     _serialPort.addHreg(CMD_LOW_REG);
@@ -61,6 +65,11 @@ void ModbusDriver::onSerialDataReceived() {
         if (xQueueReceive(_serialQueue, static_cast<void*>(&event), portMAX_DELAY)) {
             if (event.type == UART_DATA) {
                 if (xSemaphoreTake(_dataLock, pdMS_TO_TICKS(50)) == pdTRUE) {                      
+                    _serialPort.Ireg(ACTIVE_RULES_MASK_REGISTER, _ruleEngine.getActiveRulesMask());
+                    // fix device id to always contain slave id
+                    _serialPort.Hreg(DEVICE_ID_REGISTER, 0);
+                    _serialPort.Hreg(DEVICE_ID_REGISTER + 1, _serialPort.getSlaveId());
+
                     _serialPort.task();
 
                     uint16_t id = _serialPort.Hreg(CMD_TYPE_REG);
@@ -81,14 +90,12 @@ void ModbusDriver::onSerialDataReceived() {
                     }
 
                     xSemaphoreGive(_dataLock);
-
                 }
             } else if (event.type == UART_FIFO_OVF || event.type == UART_BUFFER_FULL) {
                 uart_flush_input(UART_PORT);
                 xQueueReset(_serialQueue);
             }
         }
-        _serialPort.Ireg(ACTIVE_RULES_MASK_REGISTER, _ruleEngine.getActiveRulesMask());
     }
 }
 

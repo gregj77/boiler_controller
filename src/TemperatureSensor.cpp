@@ -70,6 +70,12 @@ void TemperatureSensor::Sensors::onTaskLoopStarted() {
     }
 }
 
+void TemperatureSensor::Sensors::requireSensorUpdate() {
+    for (auto& sensor : _sensors) {
+        sensor._firstReading = true;
+    }
+}
+
 
 void TemperatureSensor::checkReading(bool notifyOutput) {
     float mv = analogReadMilliVolts(_srcPin);
