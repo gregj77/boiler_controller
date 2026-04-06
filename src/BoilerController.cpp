@@ -2,6 +2,8 @@
 #include <SPI.h>
 #include <ArduinoLog.h>
 
+constexpr BoilerController::NtcPoint BoilerController::NTC_TABLE[];
+
 BoilerController::BoilerController(BoilerStatusCallback callback) noexcept : _onStatusChanged(callback) {
     pinMode(RELAY_PIN, OUTPUT_OPEN_DRAIN);
     digitalWrite(RELAY_PIN, HIGH);
@@ -12,20 +14,20 @@ BoilerController::BoilerController(BoilerStatusCallback callback) noexcept : _on
 }
 
 void BoilerController::setOutputTemperature(float temperature) {
-    _currentTemp = temperature;
-    _outputTemp = mapTemperature(temperature);
+    
+    mapTemperature(temperature, _currentTemp, _digitalOutputValue);
 
     digitalWrite(CS_PIN, LOW);
     SPI.transfer(0x11);      // command: 0x11 - write data to channel 0
-    uint8_t value = static_cast<uint8_t>(_outputTemp);
-    SPI.transfer(value);     // value of the mapped temperature - 
+    uint8_t value = static_cast<uint8_t>(_digitalOutputValue);
+    SPI.transfer(value);     // value of the mapped temperature 
     digitalWrite(CS_PIN, HIGH);
 
-    Log.traceln("[BOILER_CTRL] Set output temperature: %F °C (mapped to %d)", _outputTemp, value);
+    Log.traceln("[BOILER_CTRL] Set output temperature: %F °C (mapped to %d)", temperature, value);
 
     // Notify callback if set
     if (_onStatusChanged) {
-        _onStatusChanged(_outputTemp, _relayEnabled);
+        _onStatusChanged(_currentTemp, _relayEnabled);
     }
 }
 
@@ -37,13 +39,44 @@ void BoilerController::toggleHeatPump(bool enable) {
 
     // Notify callback if set
     if (_onStatusChanged) {
-        _onStatusChanged(_outputTemp, _relayEnabled);
+        _onStatusChanged(_currentTemp, _relayEnabled);
     }
 }
 
-float BoilerController::mapTemperature(float temperature) const {
-    if (temperature <= _inMin) return _outMin;
-    if (temperature >= _inMax) return _outMax;
+void BoilerController::mapTemperature(float targetTemp, float& adjustedTemperature, uint8_t& digitalOutputValue) const {
 
-    return (temperature - _inMin) * (_outMax - _outMin) / (_inMax - _inMin) + _outMin;
+    if (targetTemp <= NTC_TABLE[0].temp) {
+        adjustedTemperature = NTC_TABLE[0].temp;
+        digitalOutputValue = 0;
+        return;
+    }
+
+    float targetResistance;
+    if (targetTemp >= NTC_TABLE[NTC_TABLE_SIZE - 1].temp) {
+        adjustedTemperature = NTC_TABLE[NTC_TABLE_SIZE - 1].temp;
+        targetResistance = NTC_TABLE[NTC_TABLE_SIZE - 1].ohms;
+    } else {
+        adjustedTemperature = targetTemp;
+
+        int i = 0;
+        while (i < NTC_TABLE_SIZE - 1 && targetTemp > NTC_TABLE[i + 1].temp) {
+            i++;
+        }
+
+        const NtcPoint& p0 = NTC_TABLE[i];
+        const NtcPoint& p1 = NTC_TABLE[i + 1];
+
+        targetResistance = p0.ohms + (targetTemp - p0.temp) * (p1.ohms - p0.ohms) / (p1.temp - p0.temp);
+    }
+
+    float stepsFloat = 255.0f * (1.0f - (targetResistance / MCP_MAX_OHMS));
+
+    int steps = (int)(stepsFloat + 0.5f); 
+    if (steps < 0) {
+        digitalOutputValue = 0;
+    } else if (steps > 255) {
+        digitalOutputValue = 255;
+    } else {
+        digitalOutputValue = static_cast<uint8_t>(steps);
+    }
 }

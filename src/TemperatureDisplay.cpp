@@ -5,14 +5,14 @@
 #define TOP_COLD_PIN 37
 #define TOP_MED_PIN 36
 #define TOP_HIGH_PIN 35
-#define TOP_LOW_LIMIT 33.0f
-#define TOP_HIGH_LIMIT 45.0f
+#define TOP_LOW_LIMIT 35.0f
+#define TOP_HIGH_LIMIT 55.0f
 
 #define BOTTOM_COLD_PIN 12
 #define BOTTOM_MED_PIN 13
 #define BOTTOM_HIGH_PIN 14
-#define BOTTOM_LOW_LIMIT 20.0f
-#define BOTTOM_HIGH_LIMIT 30.0f
+#define BOTTOM_LOW_LIMIT 25.0f
+#define BOTTOM_HIGH_LIMIT 35.0f
 
 TemperatureDisplay::TemperatureDisplay(const char* name, uint8_t coldTempLedPin, uint8_t midTempLedPin, uint8_t highTempLedPin, float lowToMedTempLimit, float medToHighTempLimit) noexcept
 : _name(name)
@@ -67,4 +67,10 @@ size_t TemperatureDisplay::DisplayData::printTo(Print &p) const {
     const char* statusStr = status == TempReading::High ? "HIGH" : status == TempReading::Medium ? "MEDIUM" : "LOW";
     bytesSent += p.print(statusStr);
     return bytesSent;
+}
+
+void TemperatureDisplay::onMeasureError() {
+    digitalWrite(_coldTempLedPin, HIGH);
+    digitalWrite(_midTempLedPin, HIGH);
+    digitalWrite(_highTempLedPin, HIGH);
 }

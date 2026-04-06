@@ -10,4 +10,6 @@ class ICommandDispatcher {
         virtual void dispatchCommand(const Command& cmd) = 0;
 
         virtual void registerTimer(IRule& sender, uint32_t intervalMillis, bool recurring) = 0;
+
+        virtual void disableRule(IRule& rule) = 0;
 };

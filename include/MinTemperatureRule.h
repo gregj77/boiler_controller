@@ -23,5 +23,5 @@ class MinTemperatureRule final : public IRule {
         uint16_t getId() const override { return 1; }
 
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;
-        void stop(ICommandDispatcher& dispatcher) override;
+        void onStop(ICommandDispatcher& dispatcher) override;
 };

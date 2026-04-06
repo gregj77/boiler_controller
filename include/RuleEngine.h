@@ -54,6 +54,8 @@ public:
 
     void registerTimer(IRule& sender, uint32_t intervalMillis, bool recurring) override;
 
+    void disableRule(IRule& rule) override;
+
     void registerRule(std::unique_ptr<IRule> rule, bool active);
 
     uint16_t getActiveRulesMask() const { return _activeRulesMask; };

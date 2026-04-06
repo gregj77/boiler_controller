@@ -7,11 +7,11 @@
 HighProductionYieldRule::HighProductionYieldRule() noexcept {
 }
 
-void HighProductionYieldRule::init(ICommandDispatcher& dispatcher) {
+void HighProductionYieldRule::onInit(ICommandDispatcher& dispatcher) {
     dispatcher.registerTimer(*this, 5000, true);
 }
 
-void HighProductionYieldRule::stop(ICommandDispatcher& dispatcher) {
+void HighProductionYieldRule::onStop(ICommandDispatcher& dispatcher) {
     // Ensure that the heat pump is turned off when the rule is stopped
     if (_isRequested) {
         _isRequested = false;

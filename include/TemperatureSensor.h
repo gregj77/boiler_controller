@@ -37,14 +37,14 @@ class TemperatureSensor final {
         static constexpr float CHANGE_DELTA = 0.5f;
 
         const uint8_t _srcPin;
-        String _name;
+        const char* _name;
         float _currentTemperature = 0;
         float _lastReportedTemperature = 0;
         float _resistance = 0;
         bool _firstReading = true;
         TemperatureReadingCallback _onTempChanged;
 
-        explicit TemperatureSensor(uint8_t srcPin, const String& name = "", TemperatureReadingCallback cb = nullptr) noexcept;
+        explicit TemperatureSensor(uint8_t srcPin, const char* name = "", TemperatureReadingCallback cb = nullptr) noexcept;
 
     public:
 
@@ -59,7 +59,7 @@ class TemperatureSensor final {
 
         inline float getTemp() const { return _currentTemperature; }
         inline float getResistance() const { return _resistance; }
-        inline const String& getName() const { return _name; }
+        inline const char* getName() const { return _name; }
 
     private:
         void checkReading(bool notifyOutput);

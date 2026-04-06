@@ -21,7 +21,7 @@ TemperatureSensor::Sensors::Sensors(std::initializer_list<TemperatureSensor> sen
     }
 }
 
-TemperatureSensor::TemperatureSensor(uint8_t srcPin, const String& name, TemperatureReadingCallback callback) noexcept
+TemperatureSensor::TemperatureSensor(uint8_t srcPin, const char* name, TemperatureReadingCallback callback) noexcept
 : _srcPin(srcPin)
 , _name(name)
 , _onTempChanged(std::move(callback)) {
@@ -75,7 +75,10 @@ void TemperatureSensor::checkReading(bool notifyOutput) {
     float mv = analogReadMilliVolts(_srcPin);
     
     if (mv <= 0 || mv >= MAX_REF_VOLTAGE) {
-        Log.warningln("[TEMP] sensor=%s invalid reading: %F mV", _name.c_str(), mv);
+        Log.warningln("[TEMP] sensor=%s invalid reading: %F mV", _name, mv);
+        if (_onTempChanged) {
+            _onTempChanged(NAN);
+        }
         return;        
     }
 
@@ -88,6 +91,16 @@ void TemperatureSensor::checkReading(bool notifyOutput) {
     steinhart = 1.0 / steinhart;
     
     float currentReading = (steinhart - 273.15);
+
+    if (currentReading <= 0.0f || currentReading >= 95.0f) {
+        Log.errorln("[TEMP] SENSOR RANGE EXCEEDED: %s reading %F °C", _name, currentReading);
+        if (_onTempChanged) {
+            _onTempChanged(NAN); 
+        }
+        _firstReading = true;
+        return;
+    }
+
     bool shouldNotify = false;
 
     if (_firstReading) {
@@ -105,9 +118,9 @@ void TemperatureSensor::checkReading(bool notifyOutput) {
     }
 
     if (shouldNotify) {
-        Log.noticeln("[TEMP] update reading - sensor=%s current=%F °C resistance=%F Ω", _name.c_str(), _currentTemperature, _resistance);
+        Log.noticeln("[TEMP] update reading - sensor=%s current=%F °C resistance=%F Ω", _name, _currentTemperature, _resistance);
     } else if (notifyOutput){
-        Log.verboseln("[TEMP] sensor=%s current=%F °C resistance=%F Ω", _name.c_str(), _currentTemperature, _resistance);
+        Log.verboseln("[TEMP] sensor=%s current=%F °C resistance=%F Ω", _name, _currentTemperature, _resistance);
     }
 
     if (shouldNotify && _onTempChanged) {

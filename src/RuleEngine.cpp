@@ -12,7 +12,7 @@ void RuleEngine::init() {
     for (auto& slot : _rules) {
         if (slot.isActive) {
             Log.noticeln("[RULE_ENGINE] Initializing rule '%s'", slot.rule->getName());
-            slot.rule->init(*this);
+            slot.rule->onInit(*this);
             activeRuleMask |= slot.rule->getId();
         }
     }
@@ -28,6 +28,21 @@ void RuleEngine::dispatchCommand(const Command& cmd) {
 
 void RuleEngine::registerRule(std::unique_ptr<IRule> rule, bool active) {
     _rules.emplace_back(std::move(rule), active);
+}
+
+void RuleEngine::disableRule(IRule& rule) {
+    for (auto& slot : _rules) {
+        if (slot.rule.get() == &rule) {
+            if (slot.isActive) {
+                slot.isActive = false;
+                slot.isTimerActive = false;
+                slot.rule->onStop(*this);
+                Log.noticeln("[RULE_ENGINE] Rule '%s' disabled", rule.getName());
+            }
+            return;
+        }
+    }
+    Log.warningln("[RULE_ENGINE] Attempted to disable unknown rule '%s'", rule.getName());
 }
 
 void RuleEngine::registerTimer(IRule& sender, uint32_t intervalMillis, bool recurring) {
@@ -96,7 +111,7 @@ void RuleEngine::onProcessCommand() {
                     bool isActive = slot.isActive;
                     if (shouldBeActivated && !isActive) {
                         slot.isActive = true;
-                        slot.rule->init(*this);
+                        slot.rule->onInit(*this);
                         activeRuleMask |= slot.rule->getId();
                         Log.noticeln("[RULE_ENGINE] Activating rule '%s' due to mask update", slot.rule->getName());
                     }
@@ -104,7 +119,7 @@ void RuleEngine::onProcessCommand() {
                     if (isActive && !shouldBeActivated) {
                         slot.isActive = false;
                         slot.isTimerActive = false; 
-                        slot.rule->stop(*this);
+                        slot.rule->onStop(*this);
                         Log.noticeln("[RULE_ENGINE] Deactivating rule '%s' due to mask update", slot.rule->getName());
                     }
                 }

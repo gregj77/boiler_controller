@@ -6,7 +6,8 @@
 enum TempReading {
     High = 3,
     Medium = 2,
-    Low = 1
+    Low = 1,
+    Error = 5
 };
 
 class TemperatureDisplay final {
@@ -32,6 +33,8 @@ class TemperatureDisplay final {
         static TemperatureDisplay createBottomTemperatureDisplay() noexcept;
 
         TempReading onNewTemperatureReading(float temperature);
+
+        void onMeasureError();
 
         TemperatureDisplay() = delete;
         TemperatureDisplay(const TemperatureDisplay&) = delete;

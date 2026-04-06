@@ -38,8 +38,8 @@ class HighProductionYieldRule final : public IRule {
         const char* getName() const override { return "HighProductionYield"; }
         uint16_t getId() const override { return 2; }
 
-        void init (ICommandDispatcher& dispatcher) override;
-        void stop(ICommandDispatcher& dispatcher) override;
+        void onInit (ICommandDispatcher& dispatcher) override;
+        void onStop(ICommandDispatcher& dispatcher) override;
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;
         void onTimer(ICommandDispatcher& dispatcher) override;
 };

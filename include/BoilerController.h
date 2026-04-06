@@ -11,14 +11,20 @@ class BoilerController final {
         static constexpr uint8_t CS_PIN = 42;
         static constexpr uint8_t RELAY_PIN = 38;
 
-        float _inMin = 0.0;
-        float _inMax = 80.0;
+        struct NtcPoint {
+            float temp;
+            float ohms;
+        };
 
-        float _outMin = 0.0;
-        float _outMax = 255.0;
+        static constexpr float MCP_MAX_OHMS = 10000.0f;
+        static constexpr int NTC_TABLE_SIZE = 8;
+        static constexpr NtcPoint NTC_TABLE[NTC_TABLE_SIZE] = {
+            {25.2f, 10000.0f}, {30.0f, 7947.0f}, {40.0f, 5242.0f}, {50.0f, 3548.0f},
+            {60.0f, 2459.0f},  {70.0f, 1740.0f}, {80.0f, 1256.0f}, {90.0f, 923.0f}
+        };
 
         float _currentTemp;
-        float _outputTemp;        
+        uint8_t _digitalOutputValue;        
         bool _relayEnabled = false; 
         BoilerStatusCallback _onStatusChanged;
 
@@ -29,7 +35,7 @@ class BoilerController final {
 
         void toggleHeatPump(bool enable);
 
-        float getOutputTemperature() const { return _outputTemp; }
+        float getOutputTemperature() const { return _currentTemp; }
         bool isHeatPumpEnabled() const { return _relayEnabled; }
 
         BoilerController(const BoilerController&) = delete;
@@ -38,5 +44,5 @@ class BoilerController final {
         BoilerController& operator=(BoilerController&&) = delete;
 
     private:
-        float mapTemperature(float temperature) const;
+        void mapTemperature(float targetTemp, float& adjustedTemperature, uint8_t& digitalOutputValue) const;
 };

@@ -28,7 +28,7 @@ void MinTemperatureRule::processCommand(const Command& cmd, ICommandDispatcher& 
     }
 }   
 
-void MinTemperatureRule::stop(ICommandDispatcher& dispatcher) {
+void MinTemperatureRule::onStop(ICommandDispatcher& dispatcher) {
     if (_isActive) {
         _isActive = false;
         dispatcher.dispatchCommand({CMD_RELAY_CTRL_OFF, getId()}); 

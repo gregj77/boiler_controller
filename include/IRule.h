@@ -11,9 +11,9 @@ class IRule {
 
         virtual uint16_t getId() const = 0;
 
-        virtual void init (ICommandDispatcher& dispatcher) {};
+        virtual void onInit (ICommandDispatcher& dispatcher) {};
 
-        virtual void stop(ICommandDispatcher& dispatcher) {};
+        virtual void onStop(ICommandDispatcher& dispatcher) {};
 
         virtual void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) = 0;
 
