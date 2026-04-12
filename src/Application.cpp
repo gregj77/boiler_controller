@@ -5,6 +5,7 @@
 #include "BoilerControlRule.h"
 #include "HeatPumpControlRule.h"
 #include "HotWaterBoostRule.h"
+#include "LowTemperatureBoostRule.h"
 
 #include <Arduino.h>
 #include <ArduinoLog.h>
@@ -32,6 +33,7 @@ Application::Application() noexcept:
     _ruleEngine.registerRule(std::unique_ptr<HighProductionYieldRule>(new HighProductionYieldRule()), true);
     _ruleEngine.registerRule(std::unique_ptr<HotWaterBoostRule>(new HotWaterBoostRule()), false);
     _ruleEngine.registerRule(std::unique_ptr<LegionellaRule>(new LegionellaRule()), false);
+    _ruleEngine.registerRule(std::unique_ptr<LowTemperatureBoostRule>(new LowTemperatureBoostRule()), true);
     _ruleEngine.registerRule(std::unique_ptr<HeatPumpControlRule>(new HeatPumpControlRule(_boilerController)), true);
     _ruleEngine.registerRule(std::unique_ptr<BoilerControlRule>(new BoilerControlRule(_boilerController)), true);
 

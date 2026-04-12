@@ -29,7 +29,7 @@ class HeatPumpControlRule final : public IRule {
         HeatPumpControlRule& operator=(HeatPumpControlRule&&) = delete;
 
         const char* getName() const override { return "HeatPumpControl"; }
-        uint16_t getId() const override { return 16; }
+        uint16_t getId() const override { return 1 << 14; }
 
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;
         void onStop(ICommandDispatcher& dispatcher) override;

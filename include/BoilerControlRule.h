@@ -11,8 +11,8 @@ class BoilerControlRule final : public IRule {
     private:
         static constexpr float IDLE_TEMP = static_cast<float>(CommandID::CMD_BOILER_OFF);
         static constexpr float RAMP_STEP = 0.2f;            // 0.2°C per second
-        static constexpr uint32_t SENSOR_TIMEOUT_MS = 5 * 60 * 1000; // 5 minutes
-        static constexpr uint32_t EFFICIENCY_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+        static constexpr uint32_t SENSOR_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes - if no sensor update for 15 minutes, assume sensor failure and stop the rule to prevent damage
+        static constexpr uint32_t EFFICIENCY_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes - if no heating progress for 30 minutes, assume boiler fault and stop the rule to prevent damage
 
         BoilerController& _boilerController;
 
@@ -44,7 +44,7 @@ class BoilerControlRule final : public IRule {
         BoilerControlRule& operator=(BoilerControlRule&&) = delete;
 
         const char* getName() const override { return "BoilerControl"; }
-        uint16_t getId() const override { return 32; }
+        uint16_t getId() const override { return 1 << 15; }
 
         void onInit (ICommandDispatcher& dispatcher) override;
         void processCommand(const Command& cmd, ICommandDispatcher& dispatcher) override;

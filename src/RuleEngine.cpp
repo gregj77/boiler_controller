@@ -38,6 +38,7 @@ void RuleEngine::disableRule(IRule& rule) {
                 slot.isTimerActive = false;
                 slot.rule->onStop(*this);
                 Log.noticeln("[RULE_ENGINE] Rule '%s' disabled", rule.getName());
+                _activeRulesMask &= ~(slot.rule->getId());
             }
             return;
         }
@@ -112,7 +113,6 @@ void RuleEngine::onProcessCommand() {
                     if (shouldBeActivated && !isActive) {
                         slot.isActive = true;
                         slot.rule->onInit(*this);
-                        activeRuleMask |= slot.rule->getId();
                         Log.noticeln("[RULE_ENGINE] Activating rule '%s' due to mask update", slot.rule->getName());
                     }
 
@@ -121,6 +121,10 @@ void RuleEngine::onProcessCommand() {
                         slot.isTimerActive = false; 
                         slot.rule->onStop(*this);
                         Log.noticeln("[RULE_ENGINE] Deactivating rule '%s' due to mask update", slot.rule->getName());
+                    }
+
+                    if (slot.isActive) {
+                        activeRuleMask |= slot.rule->getId();
                     }
                 }
                 _activeRulesMask = activeRuleMask;            
